@@ -22,11 +22,15 @@ python3 tools/pack_voice.py voice docs
   printf '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
   printf '<meta name="apple-mobile-web-app-title" content="Math Rocket">\n'
   printf '</head>\n<body>\n'
-  cat game.html
+  # Use the bundled font instead of Google's, so the app looks the same with no internet.
+  sed 's#<link rel="stylesheet" href="https://fonts.googleapis.com/[^>]*>#<style>@font-face{font-family:"Baloo 2";font-weight:600 800;font-display:swap;src:url(fonts/baloo2.woff2) format("woff2")}</style>#' game.html
   printf '\n</body>\n</html>\n'
 } > docs/index.html
 
 cp site/manifest.webmanifest site/icon-192.png site/icon-512.png site/apple-touch-icon.png docs/
+mkdir -p docs/fonts "$ASSETS/fonts"
+cp site/fonts/baloo2.woff2 docs/fonts/
+cp site/fonts/baloo2.woff2 "$ASSETS/fonts/"
 # A new cache name each time the game or voice changes, so installed copies update themselves.
 VERSION=$(cat docs/index.html docs/voice.json | shasum | cut -c1-10)
 sed "s/__VERSION__/$VERSION/" site/sw.js > docs/sw.js

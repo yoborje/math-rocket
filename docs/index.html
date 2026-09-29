@@ -14,7 +14,7 @@
 </head>
 <body>
 <title>Math Rocket</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap">
+<style>@font-face{font-family:"Baloo 2";font-weight:600 800;font-display:swap;src:url(fonts/baloo2.woff2) format("woff2")}</style>
 <style>
 :root{
   color-scheme:dark;
@@ -69,6 +69,8 @@ h1 span{color:var(--sun)}
 .path .pt{font-size:clamp(26px,4.8vmin,44px);font-weight:800;line-height:1.05}
 .path .ps{font-size:clamp(15px,2.3vmin,20px);opacity:.78;line-height:1.25}
 .path .ps b{font-weight:800}
+.offline{margin:0;padding:4px 16px;border-radius:999px;background:var(--panel);color:var(--muted);font-size:clamp(14px,2.2vmin,18px)}
+.offline.ok{color:var(--good)}
 .home-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:8px}
 
 /* ---------- planet map ---------- */
@@ -253,6 +255,7 @@ h1 span{color:var(--sun)}
         <span class="pill"><span class="st">★</span> <span id="homeStars">0</span> / 600</span>
         <button class="icon-btn" id="setBtn" aria-label="Settings"><svg><use href="#i-gear"/></svg></button>
       </div>
+      <p class="offline" id="offline" hidden></p>
     </div>
   </section>
 
@@ -1147,9 +1150,20 @@ function confetti(stars){
   })(start);
 }
 
+// When installed from the website, save everything for offline play and say when it's done.
 if ("serviceWorker" in navigator && location.hostname !== "appassets.androidplatform.net" &&
     (location.protocol === "https:" || location.hostname === "localhost")){
-  navigator.serviceWorker.register("sw.js").catch(function(){});
+  var offlineEl = $("#offline");
+  offlineEl.hidden = false;
+  offlineEl.textContent = "Saving for offline play… keep this open";
+  navigator.serviceWorker.register("sw.js").catch(function(){
+    offlineEl.textContent = "Offline play is not available in this browser";
+  });
+  navigator.serviceWorker.ready.then(function(){
+    return caches.match("voice.mp4", {ignoreVary: true});
+  }).then(function(saved){
+    if (saved){ offlineEl.textContent = "✓ Ready to play without internet"; offlineEl.classList.add("ok"); }
+  }).catch(function(){});
 }
 
 document.addEventListener("pointerdown", function warm(){

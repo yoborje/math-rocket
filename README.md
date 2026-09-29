@@ -39,7 +39,7 @@ To remake or change the voice (for example to add new phrases):
 
 - `game.html` – the game (edit this one)
 - `voice/` – Cori's voice clips; `tools/make_voice.py` remakes them
-- `site/` – app icon, install details (manifest) and offline cache (service worker)
+- `site/` – app icon, bundled font, install details (manifest) and offline cache (service worker)
 - `build.sh` – builds everything below from the files above
 - `docs/` – the finished web app, about 1.5 MB (GitHub Pages serves this folder)
 - `android/` – Android Studio project wrapping the same game
@@ -59,7 +59,9 @@ After changing the game or voice, run `./build.sh`.
 
 1. Open the link in **Safari** (it must be Safari) while online.
 2. Tap **Share › Add to Home Screen › Add**.
-3. Open Math Rocket from its new icon once while still online, so it saves itself.
+3. Open Math Rocket from its **new icon** while still online and wait until the home
+   screen says **"✓ Ready to play without internet"** (a few seconds).
+   The icon has its own storage, separate from Safari, so this step must happen in the icon.
    After that it works with no internet, voice included.
 
 On iPads with a side mute switch, turn silent mode off to hear the voice.
