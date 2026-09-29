@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#150F3B">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Math Rocket">
+</head>
+<body>
+<title>Math Rocket</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#150F3B; --deep:#221A5C; --panel:#2C2372; --panel-2:#3A2E8F; --line:rgba(255,248,231,.14);
+  --ink:#FFF8E7; --muted:#B9B2E8; --sun:#FFC93C; --sun-d:#C9912B; --sky:#5BC0FF; --sky-d:#2F86C4;
+  --lilac:#C38BFF; --lilac-d:#8A55D1; --tang:#FF9F5A; --tang-d:#C96A2B; --good:#3DDC97; --good-d:#1F9C66; --bad:#FF6B6B;
+  --dark-ink:#1B1446;
+  --font:"Baloo 2", ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", Roboto, system-ui, sans-serif;
+}
+html{height:100%;box-sizing:border-box}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{height:100%;margin:0;background:var(--night);color:var(--ink);font-family:var(--font);font-weight:600;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,label:focus-within{outline:4px solid var(--sun);outline-offset:3px}
+#sky,#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#sky{z-index:0}
+#confetti{z-index:9}
+#app{position:relative;z-index:1;height:100%;max-width:1240px;margin:0 auto;padding-inline:16px}
+.screen{height:100%;display:flex;flex-direction:column;padding-top:max(12px, env(safe-area-inset-top));padding-bottom:max(12px, env(safe-area-inset-bottom))}
+
+/* ---------- shared bits ---------- */
+.bar{display:flex;align-items:center;gap:12px;min-height:64px}
+.bar h2{margin:0;flex:1;font-size:clamp(24px,4.6vmin,40px);font-weight:800;line-height:1.05;text-wrap:balance}
+.icon-btn{flex:none;width:58px;height:58px;border-radius:50%;border:0;background:var(--panel);display:grid;place-items:center;box-shadow:0 5px 0 #17104a}
+.icon-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #17104a}
+.icon-btn svg{width:30px;height:30px}
+.pill{flex:none;background:var(--panel);border-radius:999px;padding:6px 16px;font-weight:800;font-size:clamp(17px,2.7vmin,24px);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pill .st{color:var(--sun)}
+.big-btn{border:0;border-radius:999px;background:var(--sun);color:#3A2600;font-weight:800;font-size:clamp(26px,4.8vmin,42px);
+  padding:.28em 1.5em;box-shadow:0 7px 0 var(--sun-d);line-height:1.3}
+.big-btn:active{transform:translateY(5px);box-shadow:0 2px 0 var(--sun-d)}
+.ghost{border:3px solid var(--line);background:transparent;border-radius:999px;padding:.3em 1.2em;font-weight:800;font-size:clamp(18px,3vmin,26px);color:var(--ink)}
+.ghost:active{background:var(--panel)}
+.sub{margin:0 0 4px;color:var(--muted);font-size:clamp(17px,2.8vmin,24px)}
+
+/* ---------- home ---------- */
+.home-wrap{margin:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.8vmin,16px);text-align:center}
+.hero{display:flex;align-items:center;gap:clamp(8px,2vmin,18px)}
+.hero-rocket{flex:none;width:clamp(72px,14vmin,130px);height:clamp(72px,14vmin,130px);animation:bob 3s ease-in-out infinite}
+.hero-rocket .flame{animation:flick .18s steps(2) infinite alternate;transform-origin:32px 47px}
+h1{margin:0;font-size:clamp(50px,11vmin,112px);line-height:.9;font-weight:800;letter-spacing:-.01em;text-align:left}
+h1 span{color:var(--sun)}
+.tag{margin:0 0 4px;color:var(--muted);font-size:clamp(18px,3vmin,26px)}
+.tracks{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2.6vmin,26px);width:min(780px,100%)}
+.path{--c:var(--sun);--d:var(--sun-d);border:0;border-radius:32px;background:var(--c);color:var(--dark-ink);box-shadow:0 9px 0 var(--d);
+  padding:clamp(12px,2.4vmin,22px) 12px clamp(14px,2.6vmin,24px);display:flex;flex-direction:column;align-items:center;gap:2px}
+.path.sub{--c:var(--sky);--d:var(--sky-d)}
+.path:active{translate:0 6px;box-shadow:0 3px 0 var(--d)}
+.path .sym{font-size:clamp(66px,13vmin,128px);line-height:.85;font-weight:800}
+.path .pt{font-size:clamp(26px,4.8vmin,44px);font-weight:800;line-height:1.05}
+.path .ps{font-size:clamp(15px,2.3vmin,20px);opacity:.78;line-height:1.25}
+.path .ps b{font-weight:800}
+.home-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:8px}
+
+/* ---------- planet map ---------- */
+.planets{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,2vmin,22px);align-content:center;padding-block:10px 18px}
+.planet{position:relative;border:2px solid var(--line);background:var(--deep);border-radius:26px;padding:16px 8px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.planet:active{transform:scale(.97)}
+.orb{width:clamp(62px,12vmin,112px);aspect-ratio:1;max-width:100%;border-radius:50%;margin-bottom:8px;position:relative;
+  background:radial-gradient(circle at 32% 30%,var(--a) 0 16%,var(--b) 78%);box-shadow:inset -9px -11px 0 rgba(0,0,0,.18)}
+.orb.ring::after{content:"";position:absolute;left:-24%;right:-24%;top:38%;height:24%;border:4px solid rgba(255,248,231,.75);border-radius:50%;transform:rotate(-16deg)}
+.orb.small{width:44px;margin:0}
+.pnum{font-size:clamp(12px,1.8vmin,15px);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pname{font-size:clamp(18px,2.8vmin,25px);font-weight:800;line-height:1.1}
+.ptopic{font-size:clamp(14px,2vmin,17px);color:var(--muted);line-height:1.2}
+.pstars{margin-top:4px;font-weight:800;color:var(--sun);font-variant-numeric:tabular-nums}
+.planet.cur{border-color:var(--sun);box-shadow:0 0 0 4px rgba(255,201,60,.25)}
+.planet.locked{opacity:.45}
+.planet.locked .orb{filter:grayscale(1)}
+.badge{position:absolute;top:8px;right:10px;background:var(--good);color:var(--dark-ink);border-radius:999px;font-size:13px;font-weight:800;padding:1px 9px}
+.lock{position:absolute;top:10px;right:12px;width:22px;height:22px}
+
+/* ---------- level select ---------- */
+.level-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(34px,6vmin,56px) clamp(10px,3vmin,30px);align-content:center;justify-items:center;padding-block:16px 44px}
+.lv{position:relative;width:clamp(72px,14vmin,124px);aspect-ratio:1;border-radius:50%;border:0;font-size:clamp(30px,6vmin,54px);font-weight:800;
+  background:var(--panel-2);box-shadow:0 7px 0 #1a1350;display:grid;place-items:center;line-height:1}
+.lv:nth-child(even){transform:translateY(22px)}
+.lv:active{box-shadow:0 2px 0 #1a1350;translate:0 5px}
+.lv.done{background:var(--sky);color:var(--dark-ink);box-shadow:0 7px 0 var(--sky-d)}
+.lv.cur{background:var(--sun);color:#3A2600;box-shadow:0 7px 0 var(--sun-d);animation:pulse 1.6s ease-in-out infinite}
+.lv.boss{font-size:clamp(34px,7vmin,62px)}
+.lv:disabled{opacity:.35;cursor:default}
+.lv .ls{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);font-size:clamp(16px,2.6vmin,22px);letter-spacing:1px;white-space:nowrap}
+.lv .ls .on{color:var(--sun)}
+.lv .ls .off{color:rgba(255,248,231,.22)}
+.lv .tagb{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--bad);color:#fff;font-size:13px;border-radius:999px;padding:0 8px;letter-spacing:.06em;text-transform:uppercase}
+
+/* ---------- play ---------- */
+.track{flex:1;position:relative;height:16px;background:rgba(255,248,231,.12);border-radius:999px;margin:0 34px 0 18px}
+.track-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--lilac),var(--sun));transition:width .6s ease}
+.track-rocket{position:absolute;top:50%;left:0;width:46px;height:46px;transform:translate(-50%,-50%) rotate(90deg);transition:left .6s ease}
+.track-planet{position:absolute;right:-30px;top:50%;transform:translateY(-50%)}
+.play-main{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,2.2vmin,22px);padding-block:8px}
+.left{display:flex;flex-direction:column;gap:clamp(10px,2vmin,18px);align-items:stretch}
+@media (orientation:landscape) and (min-width:820px){
+  .play-main{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:clamp(18px,3vw,40px)}
+}
+.q-card{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:30px;padding:clamp(16px,3.4vmin,34px) 12px;display:flex;justify-content:center}
+.q-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.22em;font-size:clamp(52px,12vmin,124px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.q-row.long{font-size:clamp(42px,9vmin,96px)}
+.q-op{color:var(--sun)}
+.q-blank{min-width:1.15em;padding:.04em .14em 0;border:5px dashed var(--sun);border-radius:20px;color:var(--sun);text-align:center}
+.q-blank.filled{border-style:solid;border-color:var(--good);color:var(--good);animation:pop .45s}
+.praise{position:absolute;top:-18px;right:18px;background:var(--good);color:var(--dark-ink);border-radius:999px;padding:2px 16px;font-weight:800;font-size:clamp(18px,3vmin,26px);opacity:0;transform:translateY(8px) scale(.8);transition:.25s}
+.praise.show{opacity:1;transform:none}
+.praise.oops{background:var(--bad);color:#fff}
+.pics{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 18px;font-size:clamp(34px,7.5vmin,66px);line-height:1.1}
+.grp{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;max-width:5.3em}
+.pics .sym{color:var(--sun);font-weight:800}
+.it{position:relative;display:inline-block}
+.it.gone{opacity:.4}
+.it.gone::after{content:"";position:absolute;left:-4%;right:-4%;top:46%;height:5px;border-radius:3px;background:var(--bad);transform:rotate(-35deg)}
+.hint{--cs:clamp(22px,4.4vmin,40px);display:flex;flex-direction:column;align-items:center;gap:8px;animation:rise .35s}
+.hint p{margin:0;color:var(--muted);font-size:clamp(16px,2.6vmin,22px);text-align:center}
+.frames{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.frame{display:grid;grid-template-columns:repeat(5,var(--cs));grid-auto-rows:var(--cs);gap:4px;padding:5px;background:#EDE8FF;border-radius:12px}
+.cell{background:#D9D1FF;border-radius:7px;display:grid;place-items:center}
+.dot{width:80%;height:80%;border-radius:50%;position:relative}
+.c1{background:var(--sky)} .c2{background:var(--sun)} .c3{background:var(--lilac)}
+.x{background:var(--bad);opacity:.75}
+.dot.x::after,.cube.x::after,.rod.x::after{content:"";position:absolute;left:10%;right:10%;top:44%;height:3px;background:var(--dark-ink);transform:rotate(-40deg)}
+.q{background:transparent;border:3px dashed #6A5DC9}
+.rods{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:flex-end;justify-content:center;padding:10px;background:#EDE8FF;border-radius:12px;max-width:100%}
+.rod,.cube{position:relative;width:calc(var(--cs)*.5);border-radius:4px}
+.rod{height:calc(var(--cs)*5);background-image:repeating-linear-gradient(to top,transparent 0 calc(10% - 2px),rgba(27,20,70,.28) calc(10% - 2px) 10%)}
+.cube{height:calc(var(--cs)*.5)}
+.gap{width:10px}
+.tools{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tool{display:flex;align-items:center;gap:8px;border:0;background:var(--panel);border-radius:999px;padding:8px 18px;font-weight:800;font-size:clamp(17px,2.6vmin,22px);box-shadow:0 4px 0 #17104a}
+.tool:active{translate:0 3px;box-shadow:0 1px 0 #17104a}
+.tool svg{width:24px;height:24px}
+.tool:disabled{opacity:.4}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2.4vmin,22px);padding-bottom:8px}
+.ans{--c:var(--sky);--d:var(--sky-d);position:relative;border:0;border-radius:26px;background:var(--c);color:var(--dark-ink);
+  min-height:clamp(84px,17vmin,150px);font-size:clamp(40px,8vmin,76px);font-weight:800;line-height:1;box-shadow:0 8px 0 var(--d);
+  display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;transition:background .2s}
+.ans:nth-child(2){--c:var(--sun);--d:var(--sun-d)}
+.ans:nth-child(3){--c:var(--lilac);--d:var(--lilac-d)}
+.ans:nth-child(4){--c:var(--tang);--d:var(--tang-d)}
+.ans:active{translate:0 5px;box-shadow:0 3px 0 var(--d)}
+.ans .letter{position:absolute;left:12px;top:10px;width:1.7em;height:1.7em;border-radius:50%;background:rgba(27,20,70,.18);display:grid;place-items:center;font-size:clamp(15px,2.4vmin,21px)}
+.ans.wrong{--c:#51478A;--d:#352D6C;color:rgba(255,248,231,.45);animation:shake .45s}
+.ans.right{--c:var(--good);--d:var(--good-d);animation:pop .45s;box-shadow:0 8px 0 var(--d),0 0 0 7px rgba(61,220,151,.35)}
+.boss{display:flex;align-items:center;justify-content:center;gap:16px}
+.alien{font-size:clamp(50px,9vmin,84px);line-height:1;animation:hover 2.2s ease-in-out infinite}
+.alien.hit{animation:hit .5s}
+.boss-info{display:flex;flex-direction:column;gap:2px}
+.boss-info b{font-size:clamp(18px,3vmin,26px)}
+.hearts{display:flex;gap:3px;font-size:clamp(20px,3.4vmin,30px);color:var(--bad);line-height:1}
+.hearts span.lost{opacity:.18}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;z-index:6;background:rgba(10,7,35,.74);display:grid;place-items:center;padding:16px;overflow:auto}
+.card{width:100%;max-width:540px;background:var(--deep);border:2px solid var(--line);border-radius:34px;padding:28px clamp(20px,5vw,44px);text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;animation:rise .35s}
+.card h2{margin:0;font-size:clamp(32px,6vmin,52px);line-height:1;font-weight:800;text-wrap:balance}
+.card p{margin:0;color:var(--muted);font-size:clamp(18px,2.8vmin,24px);max-width:30ch}
+.big-stars{display:flex;gap:6px;line-height:1}
+.big-stars span{font-size:clamp(64px,13vmin,104px);color:#44398A}
+.big-stars span.on{color:var(--sun);animation:starIn .5s both}
+.big-stars span:nth-child(2).on{animation-delay:.25s}
+.big-stars span:nth-child(3).on{animation-delay:.5s}
+.card-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center}
+.sw{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;font-size:clamp(18px,2.8vmin,23px);padding:10px 0;border-bottom:2px solid var(--line);cursor:pointer}
+.sw small{display:block;color:var(--muted);font-size:.78em}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.sw i{flex:none;width:62px;height:36px;border-radius:999px;background:#51478A;position:relative;transition:.2s}
+.sw i::after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:var(--ink);transition:.2s}
+.sw input:checked + i{background:var(--good)}
+.sw input:checked + i::after{left:30px}
+.danger{border:3px solid var(--bad);background:transparent;color:var(--bad);border-radius:999px;padding:.3em 1.2em;font-weight:800;font-size:clamp(17px,2.6vmin,22px)}
+.danger.armed{background:var(--bad);color:#fff}
+
+@media (max-width:719px){
+  .planets{grid-template-columns:repeat(2,1fr);align-content:start}
+  .level-grid{grid-template-columns:repeat(3,1fr)}
+  .lv:nth-child(even){transform:none}
+  .track{margin-right:28px}
+}
+
+@keyframes bob{50%{transform:translateY(-10px) rotate(3deg)}}
+@keyframes flick{to{transform:scaleY(.75)}}
+@keyframes pulse{50%{scale:1.07}}
+@keyframes pop{0%{scale:.85}60%{scale:1.1}100%{scale:1}}
+@keyframes shake{20%,60%{translate:-10px 0}40%,80%{translate:10px 0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes starIn{0%{transform:scale(0) rotate(-90deg);color:#44398A}100%{transform:none}}
+@keyframes hover{50%{transform:translateY(-8px)}}
+@keyframes hit{0%,100%{transform:none}25%{transform:translateX(-14px) rotate(-12deg);filter:brightness(2)}60%{transform:translateX(10px) rotate(8deg)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-rocket" viewBox="0 0 64 64">
+      <path class="flame" d="M26 46c0 7 6 14 6 14s6-7 6-14z" fill="#FFC93C"/>
+      <path d="M18 34l-9 12 11-3zM46 34l9 12-11-3z" fill="#FF6B6B"/>
+      <path d="M32 3c11 8 15 21 15 33 0 4-1 7-2 10H19c-1-3-2-6-2-10 0-12 4-25 15-33z" fill="#FFF8E7"/>
+      <path d="M32 3c5 4 9 9 11 15H21c2-6 6-11 11-15z" fill="#FF6B6B"/>
+      <circle cx="32" cy="28" r="6.5" fill="#5BC0FF" stroke="#221A5C" stroke-width="3.5"/>
+      <path d="M26 46h12l-2 4h-8z" fill="#221A5C"/>
+    </symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 4l-8 8 8 8" fill="none" stroke="#FFF8E7" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="#FFC93C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-speak" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#5BC0FF"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#5BC0FF" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="3" fill="#B9B2E8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="#B9B2E8" stroke-width="2.6"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#FFF8E7" stroke-width="2.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="#FFF8E7" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<div id="app">
+  <section id="home" class="screen">
+    <div class="home-wrap">
+      <div class="hero">
+        <svg class="hero-rocket" aria-hidden="true"><use href="#i-rocket"/></svg>
+        <h1>Math<br><span>Rocket</span></h1>
+      </div>
+      <p class="tag">What shall we practise today?</p>
+      <div class="tracks">
+        <button class="path add" data-track="add">
+          <span class="sym" aria-hidden="true">+</span>
+          <span class="pt">Addition</span>
+          <span class="ps" id="addInfo"></span>
+        </button>
+        <button class="path sub" data-track="sub">
+          <span class="sym" aria-hidden="true">−</span>
+          <span class="pt">Subtraction</span>
+          <span class="ps" id="subInfo"></span>
+        </button>
+      </div>
+      <div class="home-row">
+        <span class="pill"><span class="st">★</span> <span id="homeStars">0</span> / 600</span>
+        <button class="icon-btn" id="setBtn" aria-label="Settings"><svg><use href="#i-gear"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <section id="map" class="screen" hidden>
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+      <h2 id="mapTitle">Pick a planet</h2>
+      <span class="pill"><span class="st">★</span> <span id="mapStars">0</span></span>
+    </header>
+    <div class="planets" id="planets"></div>
+  </section>
+
+  <section id="levels" class="screen" hidden>
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg><use href="#i-back"/></svg></button>
+      <div class="orb small" id="lvOrb"></div>
+      <h2 id="lvTitle"></h2>
+      <span class="pill"><span class="st">★</span> <span id="lvStars">0</span> / 30</span>
+    </header>
+    <p class="sub" id="lvTopic"></p>
+    <div class="level-grid" id="levelGrid"></div>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Stop and go back"><svg><use href="#i-back"/></svg></button>
+      <div class="track">
+        <div class="track-fill" id="trackFill"></div>
+        <div class="track-planet"><div class="orb small" id="trackOrb"></div></div>
+        <svg class="track-rocket" id="trackRocket" aria-hidden="true"><use href="#i-rocket"/></svg>
+      </div>
+      <span class="pill" id="qCount">1 / 5</span>
+    </header>
+    <div class="play-main">
+      <div class="left">
+        <div class="boss" id="boss" hidden>
+          <div class="alien" id="alien" aria-hidden="true">👾</div>
+          <div class="boss-info"><b>Beat Zorp!</b><div class="hearts" id="hearts"></div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-row" id="qRow" aria-live="polite"></div>
+          <div class="praise" id="praise"></div>
+        </div>
+        <div class="pics" id="pics"></div>
+        <div class="hint" id="hint" hidden></div>
+        <div class="tools">
+          <button class="tool" id="hintBtn"><svg aria-hidden="true"><use href="#i-bulb"/></svg>Show me</button>
+          <button class="tool" id="sayBtn"><svg aria-hidden="true"><use href="#i-speak"/></svg>Read it</button>
+        </div>
+      </div>
+      <div class="answers" id="answers"></div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="done" hidden>
+  <div class="card">
+    <div class="big-stars" id="doneStars"><span>★</span><span>★</span><span>★</span></div>
+    <h2 id="doneTitle"></h2>
+    <p id="doneMsg"></p>
+    <div class="card-btns">
+      <button class="ghost" id="againBtn">Play again</button>
+      <button class="big-btn" id="nextBtn">Next</button>
+    </div>
+    <button class="ghost" id="doneLvBtn">Level list</button>
+  </div>
+</div>
+
+<div class="overlay" id="settings" hidden>
+  <div class="card">
+    <h2>Settings</h2>
+    <label class="sw"><span>Sounds</span><input type="checkbox" id="setSound"><i></i></label>
+    <label class="sw"><span>Talking teacher<small>Reads each question and cheers you on</small></span><input type="checkbox" id="setVoice"><i></i></label>
+    <label class="sw"><span>Unlock all levels<small>For teachers and parents</small></span><input type="checkbox" id="setUnlock"><i></i></label>
+    <div class="card-btns">
+      <button class="ghost" id="voiceTest">Hear the voice</button>
+      <button class="danger" id="resetBtn">Erase all stars</button>
+      <button class="big-btn" id="setClose">Done</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(function(){
+"use strict";
+var $ = function(s){ return document.querySelector(s); };
+
+/* ================= the two paths ================= */
+var TRACKS = {
+  add: {name:"Addition", stages:[
+    {name:"Apple Moon",    topic:"Add up to 10",                  a:"#FFC2C2", b:"#E0506A"},
+    {name:"Comet Lane",    topic:"Add up to 20",                  a:"#FFEFB3", b:"#D9A22B"},
+    {name:"Mystery Moon",  topic:"Missing numbers up to 20",      a:"#D0D8FF", b:"#4B5BD1"},
+    {name:"Triple Star",   topic:"Add three numbers",             a:"#FFF3C2", b:"#CFA326"},
+    {name:"Ring Planet",   topic:"Add tens: 40 + 30",             a:"#FFDDEE", b:"#D0578F", ring:true},
+    {name:"Rocket Reef",   topic:"Tens and ones: 47 + 8",         a:"#FFD9B0", b:"#D9702F"},
+    {name:"Twin Stars",    topic:"Two-digit numbers: 23 + 45",    a:"#C2F7DF", b:"#23A172"},
+    {name:"Sun Spot",      topic:"Carrying: 38 + 47",             a:"#FFE0A3", b:"#E07B28"},
+    {name:"Puzzle Planet", topic:"Missing numbers up to 99",      a:"#E8D4FF", b:"#8A55D1"},
+    {name:"Galaxy Crown",  topic:"The big addition mix",          a:"#FFE69A", b:"#E0567F", ring:true}
+  ]},
+  sub: {name:"Subtraction", stages:[
+    {name:"Crater Cove",   topic:"Take away up to 10",            a:"#D6F5FF", b:"#3B95CC"},
+    {name:"Ice Giant",     topic:"Take away up to 20",            a:"#CFE3FF", b:"#4A73D1"},
+    {name:"Meteor Drop",   topic:"Crossing ten: 13 − 8",          a:"#FFD2C2", b:"#C9503A"},
+    {name:"Echo Moon",     topic:"Missing numbers up to 20",      a:"#D0D8FF", b:"#4B5BD1"},
+    {name:"Dust Ring",     topic:"Take away tens: 80 − 30",       a:"#F0DDFF", b:"#9A5BC9", ring:true},
+    {name:"Asteroid Belt", topic:"Tens and ones: 42 − 7",         a:"#EDE4CF", b:"#8C7A55"},
+    {name:"Frost Moon",    topic:"Two-digit numbers: 68 − 25",    a:"#C2F7EF", b:"#1F9C8C"},
+    {name:"Black Hole",    topic:"Borrowing: 72 − 38",            a:"#C9C2FF", b:"#3D2F99"},
+    {name:"Shadow Star",   topic:"Missing numbers up to 99",      a:"#FFF3C2", b:"#CFA326"},
+    {name:"Nova Crown",    topic:"The big take-away mix",         a:"#FFE69A", b:"#E0567F", ring:true}
+  ]}
+};
+var EMOJI = ["🍎","⭐","🐟","🍓","🎈","🐞","🍪","🌼","🐥","🚗","🍩","🦋"];
+var PRAISE = ["Well done!","Brilliant!","Super!","Fantastic!","Yes!","Spot on!","Star power!","Lovely!"];
+var LETTERS = ["A","B","C","D"];
+
+/* ================= storage ================= */
+var KEY = "mathRocket.v2";
+var S = {stars:{}, sound:true, voice:false, unlockAll:false};
+try { var raw = localStorage.getItem(KEY); if (raw) { var d = JSON.parse(raw); for (var k in d) S[k] = d[k]; } } catch(e){}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+// Ask the browser to keep saved stars even when the tablet runs low on space.
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
+function starsOf(t,s,l){ return S.stars[t+"-"+s+"-"+l] || 0; }
+function stageStars(t,s){ var n=0; for (var l=0;l<10;l++) n+=starsOf(t,s,l); return n; }
+function trackStars(t){ var n=0; for (var s=0;s<10;s++) n+=stageStars(t,s); return n; }
+function totalStars(){ return trackStars("add") + trackStars("sub"); }
+function levelOpen(t,s,l){
+  if (S.unlockAll || (s===0 && l===0)) return true;
+  return l>0 ? starsOf(t,s,l-1)>0 : starsOf(t,s-1,9)>0;
+}
+function nextTarget(t){
+  for (var s=0;s<10;s++) for (var l=0;l<10;l++) if (!starsOf(t,s,l) && levelOpen(t,s,l)) return [s,l];
+  return null;
+}
+
+/* ================= question makers ================= */
+function R(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function shuffle(a){ for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function add(a,b,blank){ return {t:[a,b], o:["+"], r:a+b, blank:blank===undefined?"r":blank}; }
+function sub(a,b,blank){ return {t:[a,b], o:["-"], r:a-b, blank:blank===undefined?"r":blank}; }
+function add3(a,b,c){ return {t:[a,b,c], o:["+","+"], r:a+b+c, blank:"r"}; }
+function sub3(a,b,c){ return {t:[a,b,c], o:["-","-"], r:a-b-c, blank:"r"}; }
+function answerOf(q){ return q.blank==="r" ? q.r : q.t[q.blank]; }
+
+// A number between lo and hi whose ones digit passes okOnes.
+function withOnes(lo, hi, okOnes){ var n, t=0; do { n = R(lo,hi); } while (!okOnes(n%10) && ++t<300); return n; }
+function onesAtLeast(k){ return function(o){ return o>=k; }; }
+function onesAtMost(k){ return function(o){ return o<=k; }; }
+function onesBetween(a,b){ return function(o){ return o>=a && o<=b; }; }
+// Two two-digit numbers that add to at most maxSum, with or without carrying.
+function twoAdd(maxSum, carry, minSum){
+  var a, b, t=0;
+  do { a = R(11, maxSum-10); b = R(10, maxSum-a); }
+  while ((((a%10)+(b%10)>=10) !== carry || a+b < (minSum||0) || a%10===0 || b%10===0) && ++t<500);
+  return add(a,b);
+}
+// A two-digit take-away, with or without borrowing (exchanging a ten).
+function twoSub(maxA, borrow, minA){
+  var a, b, t=0;
+  do { a = R(minA||21, maxA); b = R(10, a-2); }
+  while ((((a%10)<(b%10)) !== borrow || b%10===0 || a-b<2) && ++t<500);
+  return sub(a,b);
+}
+var SMALLMAX = [5,6,6,7,7,8,8,9,10,10];
+function smallLo(L){ var m = SMALLMAX[L-1]; return Math.max(2, L<=3 ? 2 : L<=6 ? m-4 : m-3); }
+
+var ADD = [
+  // 1 Apple Moon: add up to 10
+  function(L){
+    var m = SMALLMAX[L-1], lo = smallLo(L);
+    if (L>=5 && Math.random()<.1){ var z = R(lo,m); return Math.random()<.5 ? add(z,0) : add(0,z); }
+    var s = R(lo,m), a = R(1,s-1); return add(a, s-a);
+  },
+  // 2 Comet Lane: add up to 20
+  function(L){
+    var a, b;
+    if (L===1){ b = R(1,9); return Math.random()<.5 ? add(10,b) : add(b,10); }
+    if (L===2){ a = withOnes(11,17,onesBetween(1,7)); return add(a, R(1,9-a%10)); }
+    if (L===3){ a = R(5,10); return add(a,a); }
+    if (L===4){ a = R(4,9); return Math.random()<.5 ? add(a,a+1) : add(a+1,a); }
+    if (L===5){ b = R(2,9); return Math.random()<.5 ? add(9,b) : add(b,9); }
+    if (L===10 && Math.random()<.3){ a = R(11,19); return add(a, 20-a); }
+    var lo = L<=7 ? 2 : 5;
+    a = R(lo,9); b = R(Math.max(lo,11-a), 9);
+    return Math.random()<.5 ? add(a,b) : add(b,a);
+  },
+  // 3 Mystery Moon: missing numbers up to 20
+  function(L){
+    var a, s;
+    if (L<=2){ s = R(5,10); a = R(1,s-1); return add(a, s-a, L===1 ? 1 : pick([0,1])); }
+    if (L===3){ a = R(1,9); return add(a, 10-a, 1); }
+    if (L===4){ a = R(1,9); return Math.random()<.5 ? add(10, a, 1) : add(a, 10-a, pick([0,1])); }
+    if (L<=6){ s = R(11,18); a = R(s-9,9); return add(a, s-a, pick([0,1])); }
+    if (L<=8){ if (Math.random()<.5){ a = R(11,19); return add(a, 20-a, 1); } s = R(11,18); return add(s-9, 9, 0); }
+    if (L===10 && Math.random()<.3){ a = R(11,19); return add(20-a, a, 0); }
+    s = R(13,18); a = R(Math.max(5,s-9), Math.min(9,s-5)); return add(a, s-a, pick([0,1]));
+  },
+  // 4 Triple Star: three numbers
+  function(L){
+    var m = [6,8,10,12,13,14,16,17,18,20][L-1];
+    if (L>=5 && Math.random()<.4){
+      var x = R(1,9), y = 10-x, c = R(1, Math.min(9, m-10));
+      var o = pick([[x,y,c],[x,c,y],[c,x,y]]); return add3(o[0],o[1],o[2]);
+    }
+    var a, b, c3, n=0;
+    do { a = R(1, Math.min(9, m-2)); b = R(1, Math.min(9, m-a-1)); c3 = R(1, Math.min(9, m-a-b)); }
+    while (L>=4 && a+b+c3 < m-4 && ++n<60);
+    return add3(a,b,c3);
+  },
+  // 5 Ring Planet: add tens
+  function(L){
+    var a, b, n;
+    if (L===1){ a = R(1,4); return add(a*10, R(1,5-a)*10); }
+    if (L===2){ a = R(1,8); return add(a*10, R(1,9-a)*10); }
+    if (L===3) return add(R(10,89), 10);
+    if (L===4){ n = R(10,79); return add(n, R(2, Math.floor((99-n)/10))*10); }
+    if (L===5){ n = withOnes(11,59,onesAtLeast(1)); return add(n, R(1, Math.floor((99-n)/10))*10); }
+    if (L===6){ n = withOnes(11,59,onesAtLeast(1)); return add(R(1, Math.floor((99-n)/10))*10, n); }
+    if (L===7){ a = R(1,4); b = R(1, Math.min(4, 8-a)); return add3(a*10, b*10, R(1, 9-a-b)*10); }
+    if (L===8){ n = withOnes(41,79,onesAtLeast(1)); return add(n, R(2, Math.floor((99-n)/10))*10); }
+    if (L===9){ a = R(1,7); return add(a*10, R(1,9-a)*10, pick([0,1])); }
+    return ADD[4](pick([6,7,8,9]));
+  },
+  // 6 Rocket Reef: two-digit add one-digit
+  function(L){
+    var a;
+    if (L===1){ a = R(1,9)*10; var o = R(1,9); return Math.random()<.5 ? add(a,o) : add(o,a); }
+    if (L===2){ a = withOnes(11,48,onesBetween(1,7)); return add(a, R(1,9-a%10)); }
+    if (L<=4){ a = withOnes(L===3 ? 21 : 41, 98, onesBetween(1,8)); return add(a, R(1,9-a%10)); }
+    if (L===5){ a = withOnes(11,89,onesAtLeast(1)); return add(a, 10-a%10); }
+    if (L<=8){ a = withOnes(11, [49,69,89][L-6], onesAtLeast(2)); return add(a, R(10-a%10, 9)); }
+    a = withOnes(50,89,onesAtLeast(4)); return add(a, R(Math.max(10-a%10,6), 9));
+  },
+  // 7 Twin Stars: two-digit + two-digit, no carrying
+  function(L){
+    var c = [[39],[49],[59],[69],[79],[89],[99,60],[99,70],[99,80],[99,88]][L-1];
+    return twoAdd(c[0], false, c[1]);
+  },
+  // 8 Sun Spot: two-digit + two-digit with carrying
+  function(L){
+    var c = [[40],[50],[60],[70],[80],[90],[99],[99,70],[99,80],[99,88]][L-1];
+    return twoAdd(c[0], true, c[1]);
+  },
+  // 9 Puzzle Planet: missing numbers up to 99
+  function(L){
+    var a, b, s, n, q;
+    if (L===1){ a = R(1,7); s = R(a+1,9); return add(a*10, (s-a)*10, 1); }
+    if (L===2){ n = withOnes(11,89,onesAtLeast(1)); return add(n, 10, 1); }
+    if (L===3){ n = withOnes(11,89,onesAtLeast(1)); return add(n, 10-n%10, 1); }
+    if (L===4){ n = withOnes(11,69,onesAtLeast(1)); return add(n, R(2, Math.floor((99-n)/10))*10, 1); }
+    if (L===5){ a = withOnes(20,89,onesAtLeast(2)); b = R(10-a%10, 9); return add(b, a, 0); }
+    if (L<=7){ q = twoAdd(L===6 ? 79 : 99, false); q.blank = L===6 ? 1 : pick([0,1]); return q; }
+    if (L===8){ n = withOnes(11,79,onesAtLeast(1)); s = R(Math.floor(n/10)+2, 9)*10; return add(n, s-n, 1); }
+    q = twoAdd(99, true, L===10 ? 70 : 50); q.blank = pick([0,1]); return q;
+  },
+  // 10 Galaxy Crown: the big addition mix
+  function(L){
+    var a, b, top;
+    if (L<=3){ top = [25,30,35][L-1]; a = R(10,top); b = R(10,top); return add3(a, b, R(5, Math.min(30, 99-a-b))); }
+    return pick([
+      function(){ return ADD[7](R(Math.min(L+2,8),10)); },
+      function(){ return ADD[8](R(Math.min(L,8),10)); },
+      function(){ return ADD[5](R(8,10)); },
+      function(){ a = R(15,35); b = R(15,35); return add3(a, b, R(10, Math.min(35, 99-a-b))); }
+    ])();
+  }
+];
+
+var SUB = [
+  // 1 Crater Cove: take away up to 10
+  function(L){
+    var a = R(smallLo(L), SMALLMAX[L-1]);
+    if (L>=5 && Math.random()<.1) return sub(a, pick([0,a]));
+    return sub(a, R(1,a-1));
+  },
+  // 2 Ice Giant: take away up to 20
+  function(L){
+    var a;
+    if (L===1) return sub(R(11,19), 10);
+    if (L===2){ a = withOnes(11,19,onesAtLeast(1)); return sub(a, a%10); }
+    if (L===3){ a = withOnes(12,19,onesAtLeast(2)); return sub(a, R(1,a%10-1)); }
+    if (L===4){ a = R(5,10); return sub(a*2, a); }
+    if (L===5){ a = withOnes(12,19,onesAtLeast(2)); return sub(a, R(11,a-1)); }
+    if (L===6){ a = R(15,19); return sub(a, R(2,a%10)); }
+    if (L===7) return sub(20, R(10,19));
+    if (L===8){ if (Math.random()<.5) return sub(20, R(11,18)); a = R(6,10); return sub(a*2, a); }
+    return pick([
+      function(){ a = withOnes(13,19,onesAtLeast(3)); return sub(a, R(11,a-2)); },
+      function(){ return sub(20, R(11,18)); },
+      function(){ a = R(6,10); return sub(a*2, a); }
+    ])();
+  },
+  // 3 Meteor Drop: crossing ten
+  function(L){
+    var a;
+    if (L<=3){ var b = [9,8,7][L-1]; return sub(R(11,b+9), b); }
+    if (L===4){ a = R(11,14); return sub(a, R(a%10+1,9)); }
+    if (L===5){ a = R(15,18); return sub(a, R(a%10+1,9)); }
+    if (L===6) return sub(20, R(3,9));
+    if (L>=8 && Math.random()<.3) return sub(20, R(5,9));
+    a = R(L>=9 ? 13 : 12, 18); return sub(a, R(Math.max(a%10+1,6), 9));
+  },
+  // 4 Echo Moon: missing numbers up to 20
+  function(L){
+    var a, b;
+    if (L<=2){ a = R(4,10); return sub(a, R(1,a-1), 1); }
+    if (L<=4){ a = R(4,10); return sub(a, R(1,a-1), L===3 ? 0 : pick([0,1])); }
+    if (L<=6){ a = withOnes(12,19,onesAtLeast(2)); return sub(a, R(1,a%10-1), pick([0,1])); }
+    if (L<=8){ a = R(11,18); return sub(a, R(a%10+1,9), L===7 ? 1 : pick([0,1])); }
+    a = Math.random()<.3 ? 20 : R(11,18); b = R(Math.max(3,a%10+1), 9); return sub(a, b, pick([0,1]));
+  },
+  // 5 Dust Ring: take away tens
+  function(L){
+    var a, n;
+    if (L===1){ a = R(2,5); return sub(a*10, R(1,a-1)*10); }
+    if (L===2){ a = R(2,9); return sub(a*10, R(1,a-1)*10); }
+    if (L===3) return sub(R(20,99), 10);
+    if (L===4){ n = R(30,99); return sub(n, R(2, Math.floor(n/10)-1)*10); }
+    if (L===5){ n = withOnes(21,59,onesAtLeast(1)); return sub(n, R(1, Math.floor(n/10)-1)*10); }
+    if (L===6){ n = withOnes(51,99,onesAtLeast(1)); return sub(n, R(2, Math.floor(n/10)-1)*10); }
+    if (L===7){ n = withOnes(21,99,onesAtLeast(1)); return sub(n, n%10 + R(1, Math.floor(n/10)-1)*10); }
+    if (L===8){ a = R(3,9); return sub(a*10, R(1,a-1)*10, 1); }
+    if (L===9){ n = withOnes(31,99,onesAtLeast(1)); return sub(n, R(1, Math.floor(n/10)-1)*10, pick([0,1])); }
+    return SUB[4](R(6,9));
+  },
+  // 6 Asteroid Belt: two-digit take away one-digit
+  function(L){
+    var a;
+    if (L===1){ a = withOnes(11,99,onesAtLeast(1)); return sub(a, a%10); }
+    if (L===2){ a = withOnes(12,49,onesAtLeast(2)); return sub(a, R(1,a%10-1)); }
+    if (L<=4){ a = withOnes(L===3 ? 22 : 52, 99, onesAtLeast(2)); return sub(a, R(1,a%10)); }
+    if (L===5){ a = R(2,9)*10; return sub(a, R(1,9)); }
+    if (L<=8){ a = withOnes(20, [49,69,99][L-6], onesAtMost(7)); return sub(a, R(a%10+1, 9)); }
+    a = withOnes(50,99,onesAtMost(5)); return sub(a, R(Math.max(a%10+1,6), 9));
+  },
+  // 7 Frost Moon: two-digit take away two-digit, no borrowing
+  function(L){
+    var c = [[39],[49],[59],[69],[79],[89],[99,60],[99,70],[99,80],[99,88]][L-1];
+    return twoSub(c[0], false, c[1]);
+  },
+  // 8 Black Hole: borrowing
+  function(L){
+    var c = [[40],[50],[60],[70],[80],[90],[99],[99,70],[99,80],[99,88]][L-1];
+    return twoSub(c[0], true, c[1]);
+  },
+  // 9 Shadow Star: missing numbers up to 99
+  function(L){
+    var a, b, n, q;
+    if (L===1){ a = R(3,9); return sub(a*10, R(1,a-1)*10, 1); }
+    if (L===2){ n = withOnes(11,79,onesAtLeast(1)); b = R(1, Math.floor((99-n)/10))*10; return sub(n+b, b, 0); }
+    if (L===3){ n = withOnes(21,99,onesAtLeast(1)); return sub(n, n%10, 1); }
+    if (L===4){ n = withOnes(31,99,onesAtLeast(1)); return sub(n, R(1, Math.floor(n/10)-1)*10, 1); }
+    if (L===5){ n = withOnes(20,99,onesAtMost(7)); return sub(n, R(n%10+1,9), 0); }
+    if (L<=7){ q = twoSub(L===6 ? 79 : 99, false); q.blank = L===6 ? 1 : pick([0,1]); return q; }
+    if (L===8){ a = R(3,9)*10; return sub(a, withOnes(11,a-2,onesAtLeast(1)), 1); }
+    q = twoSub(99, true, L===10 ? 70 : 50); q.blank = pick([0,1]); return q;
+  },
+  // 10 Nova Crown: the big take-away mix
+  function(L){
+    var a, b;
+    if (L<=3){ a = R([50,60,70][L-1], 99); b = R(10, Math.floor(a/2)); return sub3(a, b, R(5, Math.min(30, a-b-5))); }
+    return pick([
+      function(){ return SUB[7](R(Math.min(L+2,8),10)); },
+      function(){ return SUB[8](R(Math.min(L,8),10)); },
+      function(){ return SUB[5](R(8,10)); },
+      function(){ a = R(60,99); b = R(15,30); return sub3(a, b, R(10, Math.min(30, a-b-5))); }
+    ])();
+  }
+];
+TRACKS.add.gen = ADD;
+TRACKS.sub.gen = SUB;
+
+// Wrong choices are the mistakes children really make: forgetting to carry,
+// taking the small digit from the big one, being 1 or 10 out, adding instead of taking away.
+function makeChoices(q){
+  var ans = answerOf(q), a = q.t[0], b = q.t[1];
+  var big = ans>=20 || q.r>=20 || q.t.some(function(n){ return n>=20; });
+  var errs = [];
+  if (q.blank==="r" && q.t.length===2){
+    errs.push(q.o[0]==="+" ? Math.abs(a-b) : a+b);
+    if (q.o[0]==="+" && a>=10 && (a%10)+(b%10)>=10) errs.push(ans-10, ans-10);
+    if (q.o[0]==="-" && a>=20 && (a%10)<(b%10)) errs.push(Math.abs(Math.floor(a/10)-Math.floor(b/10))*10 + (b%10)-(a%10), ans+10);
+  } else if (q.blank==="r"){
+    errs.push(q.o[0]==="+" ? ans-10 : q.t[0]-q.t[1]+q.t[2]);
+  } else {
+    var other = q.t[q.blank===0?1:0]; errs.push(q.r, q.r+other, Math.abs(q.r-other));
+  }
+  var near = big ? shuffle([ans+10, ans-10, ans+1, ans-1]).concat(shuffle([ans+2, ans-2, ans+20, ans-20]))
+                 : shuffle([ans+1, ans-1, ans+2, ans-2]);
+  var far = shuffle([ans+3, ans-3, ans+4, ans-4, ans+5]);
+  var out = [ans], cap = Math.max(99, ans);
+  function tryAdd(n){ if (out.length<4 && n>=0 && n<=cap && out.indexOf(n)<0) out.push(n); }
+  shuffle(errs); if (Math.random()<.8) tryAdd(errs[0]);
+  near.forEach(tryAdd); far.forEach(tryAdd);
+  for (var k=6; out.length<4; k++){ tryAdd(ans+k); tryAdd(ans-k); }
+  return shuffle(out);
+}
+
+function makeLevel(t,s,l){
+  var n = l===9 ? 8 : 5, list = [], seen = {};
+  for (var i=0;i<n;i++){
+    var q, key, tries=0;
+    do { q = TRACKS[t].gen[s](l+1); key = q.t.join(q.o.join(""))+"|"+q.blank; } while (seen[key] && ++tries<40);
+    seen[key] = 1; q.choices = makeChoices(q); list.push(q);
+  }
+  return list;
+}
+
+/* ================= sound ================= */
+var ac = null;
+function audio(){
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch(e){}
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  if (ac.state==="suspended") ac.resume();
+  return ac;
+}
+function tone(f, dur, type, when, vol){
+  if (!S.sound) return;
+  try {
+    audio();
+    var t = ac.currentTime + (when||0), o = ac.createOscillator(), g = ac.createGain();
+    o.type = type || "triangle"; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol||0.16, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+0.05);
+  } catch(e){}
+}
+var sfx = {
+  tap:   function(){ tone(520,.06,"sine",0,.08); },
+  right: function(){ tone(660,.12); tone(990,.2,"triangle",.1); },
+  wrong: function(){ tone(240,.16,"square",0,.05); tone(190,.22,"square",.12,.05); },
+  hit:   function(){ tone(330,.08,"sawtooth",0,.06); tone(165,.22,"sawtooth",.07,.06); },
+  win:   function(){ [523,659,784,1047].forEach(function(f,i){ tone(f,.26,"triangle",i*.13); }); }
+};
+
+/* ================= the talking teacher =================
+   A British teacher's voice made ahead of time with a neural voice (tools/make_voice.py)
+   and saved as clips in voice/. Sentences are joined from clips, e.g. "Right then, what is"
+   + "38" + "plus" + "47". The device's own voice is only a fallback if the clips can't load. */
+var QTEXT = ["What is ","So, what is ","Can you work out ","Right then, what is "];
+var CHEERS = ["Well done, that's right!","Brilliant!","Lovely work!","Fantastic, well done!","Yes, spot on!","Super job!","You're a star!","Great thinking!"];
+var GENTLE = ["Ooh, not quite. Have another go.","Good try! Let's count them together.","Nearly! You can do it.","So close. Have one more go."];
+var LEAD = [["yes","Yes! "],["right","That's right, "],["welldone","Well done, "]];
+var voiceBuf = null, voiceIndex = null, voiceShift = 0, voiceLoading = null, voiceGen = 0, voiceSrcs = [];
+
+// All clips live in one file (voice.mp4) with an index (voice.json) saying where each one is.
+function loadVoice(){
+  if (!voiceLoading) voiceLoading = Promise.all([
+      fetch("voice.json").then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch("voice.mp4").then(function(r){ if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    ])
+    .then(function(res){
+      voiceIndex = res[0];
+      return new Promise(function(ok, fail){ audio().decodeAudioData(res[1], ok, fail); });
+    })
+    .then(function(buf){
+      // Some decoders add a short silence at the start. Find the first sound and line the index up with it.
+      var data = buf.getChannelData(0), n = Math.min(data.length, Math.round(buf.sampleRate * (voiceIndex.marker + .5)));
+      for (var i=0; i<n; i++) if (Math.abs(data[i]) > .02){ voiceShift = i/buf.sampleRate - voiceIndex.marker; break; }
+      if (Math.abs(voiceShift) > .2) voiceShift = 0;
+      voiceBuf = buf; return true;
+    })
+    .catch(function(){ voiceLoading = null; return false; });
+  return voiceLoading;
+}
+function stopVoice(){
+  voiceGen++;
+  voiceSrcs.forEach(function(src){ try { src.stop(); } catch(e){} });
+  voiceSrcs = [];
+  try { if ("speechSynthesis" in window) speechSynthesis.cancel(); } catch(e){}
+}
+// parts: clip names in order ("," is a short breath). text: the same words, used only by the fallback voice.
+// Resolves with roughly how many seconds the speech lasts.
+function say(parts, text){
+  stopVoice();
+  var gen = voiceGen;
+  return loadVoice().then(function(ready){
+    if (gen !== voiceGen) return 0;
+    var missing = !ready || parts.some(function(p){ return p!=="," && !voiceIndex.clips[p]; });
+    if (missing){ deviceSpeak(text); return 2.2; }
+    var ctx = audio(), start = ctx.currentTime + .05, t = start;
+    parts.forEach(function(p){
+      if (p===","){ t += .2; return; }
+      var c = voiceIndex.clips[p];
+      var src = ctx.createBufferSource(); src.buffer = voiceBuf; src.connect(ctx.destination);
+      src.start(t, Math.max(0, c[0] + voiceShift), c[1]);
+      t += c[1] + .06; voiceSrcs.push(src);
+    });
+    return t - start;
+  });
+}
+
+// Fallback only: the device's text-to-speech, preferring a British woman's voice.
+var FEMALE = /female|serena|kate|stephanie|martha|libby|sonia|maisie|hazel|susan|mia|bella|abbie|hollie|olivia|emily|amy|fiona|moira|karen|tessa|samantha|ava|allison|zoe|nicky|aria|jenny|zira|michelle/i;
+var MALE = /(^|[^e])male|daniel|arthur|oliver|ryan|george|thomas|alfie|elliot|ethan|noah|guy|david|mark|fred|alex|aaron|evan|nathan|reed|rocko|eddy|grandpa|albert|ralph|junior|brian/i;
+var sysVoice = null;
+function pickVoice(){
+  try {
+    var best = null, top = -99;
+    speechSynthesis.getVoices().forEach(function(v){
+      if (!/^en[-_]/i.test(v.lang)) return;
+      var n = v.name, sc = 0;
+      if (MALE.test(n) && !/female/i.test(n)) return;
+      if (/en[-_]GB/i.test(v.lang)) sc += 6;
+      if (FEMALE.test(n)) sc += 8;
+      if (/natural|neural|premium|enhanced|online/i.test(n)) sc += 7;
+      if (sc > top){ top = sc; best = v; }
+    });
+    sysVoice = best;
+  } catch(e){}
+}
+if ("speechSynthesis" in window){
+  pickVoice();
+  if (speechSynthesis.addEventListener) speechSynthesis.addEventListener("voiceschanged", pickVoice);
+}
+function deviceSpeak(text){
+  try {
+    if (window.AndroidTTS){ window.AndroidTTS.speak(text); return; }
+    if ("speechSynthesis" in window){
+      var u = new SpeechSynthesisUtterance(text);
+      if (sysVoice){ u.voice = sysVoice; u.lang = sysVoice.lang; } else u.lang = "en-GB";
+      u.rate = .92; speechSynthesis.speak(u);
+    }
+  } catch(e){}
+}
+
+function words(q, blankWord){
+  var w = [];
+  q.t.forEach(function(n,i){ if (i) w.push(q.o[i-1]==="+" ? "plus" : "minus"); w.push(q.blank===i && blankWord ? blankWord : String(n)); });
+  return w.join(" ");
+}
+function sumParts(q, withBlank){
+  var p = [];
+  q.t.forEach(function(n,i){ if (i) p.push(q.o[i-1]==="+" ? "add" : "sub"); p.push(withBlank && q.blank===i ? "whatnum" : "n"+n); });
+  return p;
+}
+function sayQ(q){
+  var ending = "equals";
+  if (q.blank==="r"){
+    var k = R(0,3);
+    say(["q"+k].concat(sumParts(q)), QTEXT[k] + words(q) + "?");
+  } else {
+    var puzzle = Math.random()<.4;
+    say((puzzle ? ["puzzle", ","] : []).concat(sumParts(q, true), [ending, "n"+q.r]),
+        (puzzle ? "Here's a puzzle. " : "") + words(q, "what number") + " " + ending + " " + q.r + "?");
+  }
+}
+function sayRight(q){
+  var ending = "equals";
+  if (Math.random()<.5){ var k = R(0,7); return say(["c"+k], CHEERS[k]); }
+  var lead = pick(LEAD);
+  return say([lead[0]].concat(sumParts(q), [ending, "n"+q.r]), lead[1] + words(q) + " " + ending + " " + q.r + ".");
+}
+function sayGentle(){ var k = R(0,3); say(["g"+k], GENTLE[k]); }
+
+/* ================= screens ================= */
+var screen = "home", curT = "add", curS = 0, curL = 0;
+function stagesOf(t){ return TRACKS[t].stages; }
+function show(id){
+  ["home","map","levels","play"].forEach(function(k){ $("#"+k).hidden = k!==id; });
+  screen = id;
+  if (id==="home") renderHome();
+  if (id==="map") renderMap();
+  if (id==="levels") renderLevels();
+}
+function orbStyle(st){ return "--a:"+st.a+";--b:"+st.b; }
+function starStr(n){ return '<span class="on">'+"★".repeat(n)+'</span><span class="off">'+"★".repeat(3-n)+"</span>"; }
+
+function renderHome(){
+  $("#homeStars").textContent = totalStars();
+  ["add","sub"].forEach(function(t){
+    var nt = nextTarget(t);
+    $("#"+t+"Info").innerHTML = "★ "+trackStars(t)+" / 300<br>" +
+      (nt ? "Next: <b>"+stagesOf(t)[nt[0]].name+"</b>, level "+(nt[1]+1) : "<b>All planets done!</b>");
+  });
+}
+
+function renderMap(){
+  var tr = TRACKS[curT], nt = nextTarget(curT);
+  $("#mapTitle").textContent = tr.name + " planets";
+  $("#mapStars").textContent = trackStars(curT) + " / 300";
+  var h = "";
+  tr.stages.forEach(function(st,s){
+    var open = levelOpen(curT,s,0), ss = stageStars(curT,s), beat = starsOf(curT,s,9)>0;
+    var cls = "planet" + (open ? "" : " locked") + (nt && nt[0]===s ? " cur" : "");
+    h += '<button class="'+cls+'" data-s="'+s+'"'+(open?"":" disabled")+' aria-label="Planet '+(s+1)+", "+st.name+", "+st.topic+(open?"":", locked")+'">'
+      + (open ? (beat ? '<span class="badge">Done</span>' : "") : '<svg class="lock"><use href="#i-lock"/></svg>')
+      + '<div class="orb'+(st.ring?" ring":"")+'" style="'+orbStyle(st)+'"></div>'
+      + '<span class="pnum">Planet '+(s+1)+'</span><span class="pname">'+st.name+'</span><span class="ptopic">'+st.topic+'</span>'
+      + '<span class="pstars">★ '+ss+' / 30</span></button>';
+  });
+  $("#planets").innerHTML = h;
+}
+
+function renderLevels(){
+  var st = stagesOf(curT)[curS];
+  $("#lvTitle").textContent = st.name;
+  $("#lvTopic").textContent = TRACKS[curT].name+", planet "+(curS+1)+": "+st.topic+". Beat level 10 to fly to the next planet.";
+  $("#lvStars").textContent = stageStars(curT,curS);
+  var orb = $("#lvOrb"); orb.setAttribute("style", orbStyle(st)); orb.className = "orb small"+(st.ring?" ring":"");
+  var nt = nextTarget(curT), h = "";
+  for (var l=0;l<10;l++){
+    var open = levelOpen(curT,curS,l), n = starsOf(curT,curS,l), boss = l===9;
+    var cls = "lv" + (boss?" boss":"") + (n?" done":"") + (nt && nt[0]===curS && nt[1]===l ? " cur" : "");
+    h += '<button class="'+cls+'" data-l="'+l+'"'+(open?"":" disabled")+' aria-label="Level '+(l+1)+(boss?", boss":"")+(open?", "+n+" stars":", locked")+'">'
+      + (boss ? '<span class="tagb">Boss</span>👾' : (l+1))
+      + (open ? '<span class="ls">'+starStr(n)+"</span>" : "") + "</button>";
+  }
+  $("#levelGrid").innerHTML = h;
+}
+
+/* ================= game ================= */
+var G = null;
+function startLevel(t,s,l){
+  curT = t; curS = s; curL = l;
+  G = {t:t, s:s, l:l, qs:makeLevel(t,s,l), i:0, first:0, missed:false, busy:false, boss:l===9};
+  var st = stagesOf(t)[s], orb = $("#trackOrb");
+  orb.setAttribute("style", orbStyle(st)); orb.className = "orb small"+(st.ring?" ring":"");
+  $("#boss").hidden = !G.boss;
+  if (G.boss) $("#hearts").innerHTML = G.qs.map(function(){ return "<span>♥</span>"; }).join("");
+  show("play");
+  renderQ();
+}
+
+function renderQ(){
+  var q = G.qs[G.i]; G.missed = false; G.busy = false;
+  var h = [];
+  q.t.forEach(function(n,i){
+    if (i) h.push('<span class="q-op">'+(q.o[i-1]==="+"?"+":"−")+"</span>");
+    h.push(q.blank===i ? '<span class="q-blank" id="blank">?</span>' : "<span>"+n+"</span>");
+  });
+  h.push('<span class="q-op">=</span>');
+  h.push(q.blank==="r" ? '<span class="q-blank" id="blank">?</span>' : "<span>"+q.r+"</span>");
+  var row = $("#qRow");
+  row.innerHTML = h.join("");
+  row.classList.toggle("long", row.textContent.length > 9);
+  row.setAttribute("aria-label", words(q, "what number") + (q.blank==="r" ? " equals what" : " equals "+q.r));
+
+  var showPics = q.blank==="r" && q.t.length===2 && G.s===0 && G.l<=4;
+  $("#pics").innerHTML = showPics ? picsHTML(q) : "";
+  $("#pics").hidden = !showPics;
+  $("#hint").hidden = true; $("#hint").innerHTML = "";
+  $("#hintBtn").disabled = false;
+
+  $("#answers").innerHTML = q.choices.map(function(c,i){
+    return '<button class="ans" data-i="'+i+'" aria-label="'+LETTERS[i]+": "+c+'"><span class="letter">'+LETTERS[i]+"</span>"+c+"</button>";
+  }).join("");
+
+  $("#qCount").textContent = (G.i+1)+" / "+G.qs.length;
+  var pct = (G.i/G.qs.length)*100;
+  $("#trackFill").style.width = pct+"%"; $("#trackRocket").style.left = pct+"%";
+  if (S.voice) sayQ(q);
+}
+
+function picsHTML(q){
+  var e = pick(EMOJI), a = q.t[0], b = q.t[1];
+  function grp(n, goneFrom){
+    var s = '<span class="grp">';
+    for (var i=0;i<n;i++) s += '<span class="it'+(goneFrom!==undefined && i>=goneFrom ? " gone" : "")+'">'+e+"</span>";
+    return s + "</span>";
+  }
+  if (q.o[0]==="+") return (a?grp(a):'<span class="sym">0</span>') + '<span class="sym">+</span>' + (b?grp(b):'<span class="sym">0</span>');
+  return a ? grp(a, a-b) : '<span class="sym">0</span>';
+}
+
+function hintData(q){
+  var a = q.t[0], b = q.t[1], plus = q.o[0]==="+";
+  if (q.blank==="r"){
+    if (q.t.length===3){
+      if (plus) return {segs:[{n:a,c:"c1"},{n:b,c:"c2"},{n:q.t[2],c:"c3"}], say:"Count them all."};
+      return {segs:[{n:q.r,c:"c1"},{n:b,c:"x"},{n:q.t[2],c:"x"}], say:"Cross out "+b+", then "+q.t[2]+". Count what is left."};
+    }
+    if (plus) return {segs:[{n:a,c:"c1"},{n:b,c:"c2"}], say:"Count them all."};
+    return {segs:[{n:a-b,c:"c1"},{n:b,c:"x"}], say:"Cross out "+b+". Count what is left."};
+  }
+  if (plus){
+    var known = q.t[q.blank===0?1:0];
+    return {segs: q.blank===0 ? [{n:q.r-known,c:"q"},{n:known,c:"c2"}] : [{n:known,c:"c1"},{n:q.r-known,c:"q"}],
+            say:"Count the empty ones. Together they make "+q.r+"."};
+  }
+  if (q.blank===1) return {segs:[{n:q.r,c:"c1"},{n:a-q.r,c:"q"}], say:"Start with "+a+". Count the empty ones to take away."};
+  return {segs:[{n:q.r,c:"c1"},{n:b,c:"c2"}], say:q.r+" and "+b+" put back together."};
+}
+
+function hintHTML(q){
+  var d = hintData(q), total = 0, h;
+  d.segs.forEach(function(s){ total += s.n; });
+  if (total>20){
+    h = '<div class="rods">';
+    d.segs.forEach(function(s,i){
+      if (i) h += '<span class="gap"></span>';
+      for (var t=0;t<Math.floor(s.n/10);t++) h += '<span class="rod '+s.c+'"></span>';
+      for (var o=0;o<s.n%10;o++) h += '<span class="cube '+s.c+'"></span>';
+    });
+    h += "</div>";
+    d.say += " Each tall bar is 10.";
+  } else {
+    var cells = [];
+    d.segs.forEach(function(s){ for (var i=0;i<s.n;i++) cells.push(s.c); });
+    h = '<div class="frames">';
+    for (var f=0; f<(total>10?2:1); f++){
+      h += '<div class="frame">';
+      for (var i=0;i<10;i++){ var c = cells[f*10+i]; h += '<span class="cell">'+(c?'<i class="dot '+c+'"></i>':"")+"</span>"; }
+      h += "</div>";
+    }
+    h += "</div>";
+  }
+  return h + "<p>"+d.say+"</p>";
+}
+function showHint(){
+  if (!G) return;
+  var el = $("#hint");
+  if (el.hidden){ el.innerHTML = hintHTML(G.qs[G.i]); el.hidden = false; }
+  $("#hintBtn").disabled = true;
+}
+
+var praiseTimer;
+function praise(text, bad){
+  var p = $("#praise"); p.textContent = text; p.className = "praise show"+(bad?" oops":"");
+  clearTimeout(praiseTimer); praiseTimer = setTimeout(function(){ p.className = "praise"+(bad?" oops":""); }, 1100);
+}
+
+function choose(i){
+  if (!G || G.busy) return;
+  var q = G.qs[G.i], btn = $("#answers").children[i];
+  if (!btn || btn.classList.contains("wrong")) return;
+  if (q.choices[i] === answerOf(q)){
+    G.busy = true;
+    if (!G.missed) G.first++;
+    btn.classList.add("right");
+    var bl = $("#blank"); bl.textContent = answerOf(q); bl.classList.add("filled");
+    sfx.right(); praise(pick(PRAISE));
+    if (G.boss){
+      var hs = $("#hearts").children; if (hs[G.i]) hs[G.i].classList.add("lost");
+      var al = $("#alien"); al.classList.remove("hit"); void al.offsetWidth; al.classList.add("hit"); setTimeout(sfx.hit, 180);
+    }
+    var pct = ((G.i+1)/G.qs.length)*100;
+    $("#trackFill").style.width = pct+"%"; $("#trackRocket").style.left = pct+"%";
+    var g = G;
+    var advance = function(){
+      if (G !== g) return;
+      G.i++;
+      if (G.i >= G.qs.length) finish(); else renderQ();
+    };
+    // With the teacher on, move on once she has finished praising.
+    if (S.voice) setTimeout(function(){
+      sayRight(q).then(function(sec){ setTimeout(advance, Math.max(600, sec*1000 + 300)); });
+    }, 250);
+    else setTimeout(advance, 1150);
+  } else {
+    G.missed = true;
+    btn.classList.add("wrong"); btn.setAttribute("aria-disabled","true");
+    sfx.wrong(); praise("Try again!", true);
+    showHint();
+    if (S.voice) sayGentle();
+  }
+}
+
+function finish(){
+  var n = G.qs.length, ratio = G.first/n;
+  var stars = ratio===1 ? 3 : ratio>=.7 ? 2 : 1;
+  var k = G.t+"-"+G.s+"-"+G.l, prev = S.stars[k]||0, list = stagesOf(G.t);
+  S.stars[k] = Math.max(prev, stars); save();
+  sfx.win(); confetti(stars);
+  var sp = $("#doneStars").children;
+  for (var i=0;i<3;i++){ sp[i].className = ""; }
+  void $("#doneStars").offsetWidth;
+  for (i=0;i<3;i++){ if (i<stars) sp[i].className = "on"; }
+  $("#doneTitle").textContent = G.boss ? "You beat Zorp!" : "Level "+(G.l+1)+" done!";
+  var msg = stars===3 ? "Perfect! Every answer right the first time."
+          : stars===2 ? "Great work! "+G.first+" of "+n+" right the first time."
+          : "You made it! Play again to earn more stars.";
+  var last = G.boss && G.s===9;
+  if (G.boss && !prev && G.s<9) msg += " You can now fly to "+list[G.s+1].name+".";
+  if (last) msg = "You finished every "+TRACKS[G.t].name.toLowerCase()+" planet. You are a Math Rocket captain!";
+  $("#doneMsg").textContent = msg;
+  $("#nextBtn").textContent = G.l<9 ? "Next level" : G.s<9 ? "Next planet" : "All planets";
+  $("#done").hidden = false;
+  setTimeout(function(){ $("#nextBtn").focus(); }, 50);
+  var endClip = last ? ["endall","Hooray! You've finished every planet. What a superstar!"]
+    : G.boss ? ["endboss","Hooray! You beat Zorp. Well done!"]
+    : stars===3 ? ["end3","Wow, three stars! That was perfect."]
+    : stars===2 ? ["end2","Well done, two stars! Lovely work."]
+    : ["end1","You did it! Let's have another go for more stars."];
+  if (S.voice) setTimeout(function(){ say([endClip[0]], endClip[1]); }, 600);
+}
+
+/* ================= events ================= */
+document.addEventListener("click", function(e){
+  var t = e.target.closest("button"); if (!t) return;
+  if (t.hasAttribute("data-back")){ sfx.tap(); back(); return; }
+  if (t.hasAttribute("data-track")){ sfx.tap(); curT = t.getAttribute("data-track"); show("map"); return; }
+  if (t.classList.contains("ans")){ choose(+t.getAttribute("data-i")); return; }
+  if (t.classList.contains("planet")){ sfx.tap(); curS = +t.getAttribute("data-s"); show("levels"); return; }
+  if (t.classList.contains("lv")){ sfx.tap(); startLevel(curT, curS, +t.getAttribute("data-l")); return; }
+});
+$("#hintBtn").onclick = function(){ sfx.tap(); showHint(); };
+$("#sayBtn").onclick = function(){ if (G) sayQ(G.qs[G.i]); };
+$("#againBtn").onclick = function(){ $("#done").hidden = true; startLevel(curT, curS, curL); };
+$("#doneLvBtn").onclick = function(){ $("#done").hidden = true; show("levels"); };
+$("#nextBtn").onclick = function(){
+  $("#done").hidden = true;
+  if (curL<9) startLevel(curT, curS, curL+1);
+  else if (curS<9){ curS++; show("levels"); }
+  else show("map");
+};
+
+$("#setBtn").onclick = function(){
+  $("#setSound").checked = S.sound; $("#setVoice").checked = S.voice; $("#setUnlock").checked = S.unlockAll;
+  $("#settings").hidden = false;
+};
+$("#setSound").onchange = function(){ S.sound = this.checked; save(); sfx.tap(); };
+$("#setVoice").onchange = function(){ S.voice = this.checked; save(); if (S.voice) say(["hello"], "Hello! I'll read the questions with you. Let's get started."); };
+$("#voiceTest").onclick = function(){
+  if (Math.random()<.5) say(["test0"], "Hello there! Ready to fly? Shall we do some maths together?");
+  else say(["test1"], "Hello, space explorer! Let's do some plus and minus together.");
+};
+$("#setUnlock").onchange = function(){ S.unlockAll = this.checked; save(); };
+var armTimer;
+$("#resetBtn").onclick = function(){
+  var b = this;
+  if (!b.classList.contains("armed")){
+    b.classList.add("armed"); b.textContent = "Tap again to erase";
+    clearTimeout(armTimer); armTimer = setTimeout(function(){ b.classList.remove("armed"); b.textContent = "Erase all stars"; }, 3000);
+    return;
+  }
+  clearTimeout(armTimer); S.stars = {}; save();
+  b.classList.remove("armed"); b.textContent = "Stars erased";
+  setTimeout(function(){ b.textContent = "Erase all stars"; }, 1500);
+};
+$("#setClose").onclick = function(){ $("#settings").hidden = true; renderHome(); };
+
+document.addEventListener("keydown", function(e){
+  if (screen==="play" && $("#done").hidden){
+    var i = "abcd".indexOf(e.key.toLowerCase()); if (i<0) i = "1234".indexOf(e.key);
+    if (i>=0) choose(i);
+  }
+  if (e.key==="Escape") back();
+});
+
+// Back: overlays first, then play -> levels -> map -> home. Returns false when there is nowhere left to go (Android closes the app).
+function back(){
+  stopVoice();
+  if (!$("#settings").hidden){ $("#settings").hidden = true; renderHome(); return true; }
+  if (!$("#done").hidden){ $("#done").hidden = true; show("levels"); return true; }
+  if (screen==="play"){ G = null; show("levels"); return true; }
+  if (screen==="levels"){ show("map"); return true; }
+  if (screen==="map"){ show("home"); return true; }
+  return false;
+}
+window.mrBack = back;
+
+/* ================= sky + confetti ================= */
+var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+var sky = $("#sky"), sx = sky.getContext("2d"), dots = [], W = 0, H = 0;
+function sizeSky(){
+  var dpr = Math.min(2, window.devicePixelRatio||1); W = innerWidth; H = innerHeight;
+  [sky, $("#confetti")].forEach(function(c){ c.width = W*dpr; c.height = H*dpr; c.getContext("2d").setTransform(dpr,0,0,dpr,0,0); });
+  dots = [];
+  for (var i=0, n=Math.round(W*H/5500); i<n; i++) dots.push({x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.5+.4, p:Math.random()*6.3, s:.4+Math.random()*1.4});
+  if (reduce) drawSky(0);
+}
+var lastFrame = 0;
+function drawSky(t){
+  if (!reduce) requestAnimationFrame(drawSky);
+  if (t-lastFrame < 45 && t) return; lastFrame = t;
+  var g = sx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#150F3B"); g.addColorStop(1,"#2B1D66");
+  sx.fillStyle = g; sx.fillRect(0,0,W,H);
+  sx.fillStyle = "#FFF8E7";
+  for (var i=0;i<dots.length;i++){
+    var d = dots[i]; sx.globalAlpha = .3 + .7*Math.abs(Math.sin(d.p + t/1000*d.s));
+    sx.beginPath(); sx.arc(d.x, d.y, d.r, 0, 6.283); sx.fill();
+  }
+  sx.globalAlpha = 1;
+}
+addEventListener("resize", sizeSky); sizeSky(); if (!reduce) requestAnimationFrame(drawSky);
+
+function confetti(stars){
+  if (reduce) return;
+  var c = $("#confetti"), cx = c.getContext("2d"), cols = ["#FFC93C","#5BC0FF","#C38BFF","#FF9F5A","#3DDC97","#FF6B6B"], ps = [];
+  for (var i=0;i<40+stars*35;i++) ps.push({x:W/2, y:H*.45, vx:(Math.random()-.5)*16, vy:-Math.random()*15-4, s:6+Math.random()*8, r:Math.random()*6, vr:(Math.random()-.5)*.4, c:pick(cols)});
+  var start = performance.now();
+  (function step(now){
+    cx.clearRect(0,0,W,H);
+    ps.forEach(function(p){ p.vy += .45; p.x += p.vx; p.y += p.vy; p.r += p.vr; cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.fillRect(-p.s/2,-p.s/3,p.s,p.s*.66); cx.restore(); });
+    if (now-start < 2600) requestAnimationFrame(step); else cx.clearRect(0,0,W,H);
+  })(start);
+}
+
+if ("serviceWorker" in navigator && location.hostname !== "appassets.androidplatform.net" &&
+    (location.protocol === "https:" || location.hostname === "localhost")){
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+
+document.addEventListener("pointerdown", function warm(){
+  document.removeEventListener("pointerdown", warm);
+  audio(); loadVoice();
+});
+
+show("home");
+})();
+</script>
+
+</body>
+</html>
