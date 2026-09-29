@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import android.speech.tts.Voice
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -90,7 +89,7 @@ class MainActivity : Activity() {
                 val n = v.name.lowercase(Locale.ROOT)
                 v.locale.language == "en" &&
                     !v.isNetworkConnectionRequired &&
-                    v.features?.contains(Voice.FEATURE_NOT_INSTALLED) != true &&
+                    v.features?.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED) != true &&
                     maleIds.none { n.contains(it) }
             }
             .maxByOrNull { v ->
